@@ -6,7 +6,7 @@
 #SBATCH --mem=8G
 #SBATCH --cpus-per-task=4
 
-# Directory with your summary stats files
+# Directory with  summary stats files
 SUMSTATS_DIR="/projects/lindstroem/MD_MR_Inflammatory_Biomarkers/IMD_GWAS_CIMs/harmonized_p_filtered/pre_clumping_SNPs/"
 
 # Directory with chromosome-specific PLINK reference files
@@ -40,10 +40,9 @@ for file in "${SUMSTATS_DIR}"/*.txt; do
         
         if [ "$num_snps" -le 1 ]; then
             echo "Only $num_snps SNP(s) on chromosome ${chr}, skipping PLINK clumping."
-            # Copy the original rows (header + SNP row) as-is
             awk -v c="${chr}" 'NR==1 || $2==c' "${file}" > "${final_out}"
         else
-            # Use the chromosome-specific rows directly, no deduplication
+            # Use the chromosome-specific rows
             tmp_chr_file=$(mktemp)
             awk -v c="${chr}" 'NR==1 || $2==c' "${file}" > "${tmp_chr_file}"
             
