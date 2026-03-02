@@ -190,24 +190,52 @@ data_DA <- data_sig %>%
 data_NDA <- data_sig %>%
   filter(Outcome == "NDA")
 
+# Ensure Exposure ordering is alphabetical
+data_PMD$Exposure <- factor(data_PMD$Exposure,
+                            levels = rev(sort(unique(data_PMD$Exposure))))
+
+data_DA$Exposure  <- factor(data_DA$Exposure,
+                            levels = rev(sort(unique(data_DA$Exposure))))
+
+data_NDA$Exposure <- factor(data_NDA$Exposure,
+                            levels = rev(sort(unique(data_NDA$Exposure))))
+
+# Get all unique methods across datasets
+all_methods <- unique(c(data_PMD$Method,
+                        data_DA$Method,
+                        data_NDA$Method))
+
+# Create default brewer palette
+default_cols <- scales::brewer_pal(palette = "Set1")(length(all_methods))
+names(default_cols) <- all_methods
+
+# Force MR IVW to black
+default_cols["MR IVW"] <- "black"
+
+# Add function to check if error 95% CI for MR estimate crosses 0
+add_cross_flag <- function(df) {
+  df$crosses0 <- with(df, CILower <= 0 & CIUpper >= 0)
+  df
+}
+
+# Run function 
+
+data_PMD <- add_cross_flag(data_PMD)
+data_DA  <- add_cross_flag(data_DA)
+data_NDA <- add_cross_flag(data_NDA)
+
+
 # Plots
 
 pd <- position_dodge(width = 0.6)
+shape_vals <- c(`FALSE` = 16, `TRUE` = 1)
 
 ## PMD
-data_PMD <- data_PMD %>%
-  mutate(
-    Exposure = fct_reorder(
-      Exposure,
-      ifelse(Method == "MR IVW", Estimate, NA_real_),
-      .fun = function(x) mean(x, na.rm = TRUE)
-    )
-  )
-
 plot_PMD = ggplot(data_PMD,
                   aes(x = Estimate,
                       y = Exposure,
-                      color = Method)) +
+                      color = Method,
+                      shape = crosses0)) +
   geom_vline(xintercept = 0,
              linetype = "dashed",
              color = "grey50") +
@@ -218,8 +246,11 @@ plot_PMD = ggplot(data_PMD,
   ) +
   geom_point(
     size = 2,
+    stroke = 1,
     position = pd
   ) +
+  scale_color_manual(values = default_cols) +
+  scale_shape_manual(values = shape_vals, guide = "none") +
   labs(
     x = "MR estimate for PMD (sqrt(%))",
     y = "MR instrument",
@@ -232,21 +263,12 @@ plot_PMD = ggplot(data_PMD,
     legend.position = "none"
   )
 
-
 ## DA
-data_DA <- data_DA %>%
-  mutate(
-    Exposure = fct_reorder(
-      Exposure,
-      ifelse(Method == "MR IVW", Estimate, NA_real_),
-      .fun = function(x) mean(x, na.rm = TRUE)
-    )
-  )
-
 plot_DA = ggplot(data_DA,
                  aes(x = Estimate,
                      y = Exposure,
-                     color = Method)) +
+                     color = Method,
+                     shape = crosses0)) +
   geom_vline(xintercept = 0,
              linetype = "dashed",
              color = "grey50") +
@@ -257,10 +279,13 @@ plot_DA = ggplot(data_DA,
   ) +
   geom_point(
     size = 2,
+    stroke = 1,
     position = pd
   ) +
+  scale_color_manual(values = default_cols) +
+  scale_shape_manual(values = shape_vals, guide = "none") +
   labs(
-    x = "MR estimate for DA (sqrt(%))",
+    x = expression("MR estimate for DA (sqrt(cm"^2*"))"),
     y = "MR instrument",
     color = "MR method"
   ) +
@@ -271,21 +296,12 @@ plot_DA = ggplot(data_DA,
     legend.position = "none"
   )
 
-
 ## NDA
-data_NDA <- data_NDA %>%
-  mutate(
-    Exposure = fct_reorder(
-      Exposure,
-      ifelse(Method == "MR IVW", Estimate, NA_real_),
-      .fun = function(x) mean(x, na.rm = TRUE)
-    )
-  )
-
 plot_NDA = ggplot(data_NDA,
                   aes(x = Estimate,
                       y = Exposure,
-                      color = Method)) +
+                      color = Method,
+                      shape = crosses0)) +
   geom_vline(xintercept = 0,
              linetype = "dashed",
              color = "grey50") +
@@ -296,10 +312,13 @@ plot_NDA = ggplot(data_NDA,
   ) +
   geom_point(
     size = 2,
+    stroke = 1,
     position = pd
   ) +
+  scale_color_manual(values = default_cols) +
+  scale_shape_manual(values = shape_vals, guide = "none") +
   labs(
-    x = "MR estimate for NDA (sqrt(%))",
+    x = expression("MR estimate for NDA (sqrt(cm"^2*"))"),
     y = "MR instrument",
     color = "MR method"
   ) +
@@ -320,8 +339,6 @@ combined =
     legend.title = element_text(size = 10),
     legend.text = element_text(size = 9)
   )
-
-combined
 
 ggsave(combined, filename = "/lindstroem/MD_MR_Inflammatory_Biomarkers/MR_results/Figures/Figure_3.jpg",
        width = 12, height = 8, dpi = 300)
