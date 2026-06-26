@@ -273,7 +273,7 @@ combined =
   )
 
 ggsave(combined, filename = "/lindstroem/MD_MR_Inflammatory_Biomarkers/MR_results/Figures/Figure_2.jpg",
-       width = 12, height = 8, dpi = 300)
+       width = 12, height = 8, dpi = 500)
 
 ######################## Multivariable MR #######################################
 CRP_BMI_MVMR = read_tsv("/lindstroem/MD_MR_Inflammatory_Biomarkers/MR_results/CRP_BMI_MVMR_results.tsv")
@@ -477,7 +477,7 @@ combined = plot_PMD + plot_DA + plot_NDA +
   plot_layout(ncol = 3)
 
 #ggsave(combined, filename = "/lindstroem/MD_MR_Inflammatory_Biomarkers/MR_results/Figures/Figure_4.jpg",
-       #width = 12, height = 8, dpi = 300)
+       #width = 12, height = 8, dpi = 500)
 
 # Sensitivity analyses for significant CIMs in MVMR analyses #
 
@@ -656,4 +656,4 @@ combined =
   )
 
 ggsave(combined, filename = "/lindstroem/MD_MR_Inflammatory_Biomarkers/MR_results/Figures/Figure_3.jpg",
-       width = 12, height = 8, dpi = 300)
+       width = 12, height = 8, dpi = 500)
