@@ -33,16 +33,10 @@ MD_data = read_tsv("/lindstroem/MD_MR_Inflammatory_Biomarkers/MR_results/IMD_GWA
 MD_OpenGWAS_data = read_tsv("/lindstroem/MD_MR_Inflammatory_Biomarkers/MR_results/OpenGWAS_project_CIM_MR_results.tsv")
 CRP_BMI_MVMR = read_tsv("/lindstroem/MD_MR_Inflammatory_Biomarkers/MR_results/CRP_BMI_MVMR_results.tsv")
 
-CRP_BMI_MVMR <- CRP_BMI_MVMR %>%
-  mutate(
-    Exposure = paste0(Exposure, "*")
-  )
-
 OpenGWAS_BMI_MVMR = read_tsv("/lindstroem/MD_MR_Inflammatory_Biomarkers/MR_results/OpenGWAS_project_CIM_BMI_MVMR_results.tsv")
 
 OpenGWAS_BMI_MVMR <- OpenGWAS_BMI_MVMR %>%
   mutate(
-    Exposure = paste0(Exposure, "*"),
     Method = gsub("MVMR Egger", "MVMR-Egger", Method)
   )
 
@@ -77,7 +71,7 @@ CI_bounds <- str_match(
 NDA_qhet$CI_lower <- as.numeric(CI_bounds[, 2])
 NDA_qhet$CI_upper <- as.numeric(CI_bounds[, 3])
 
-qhet = data.frame(Exposure = c("CRP*","BMI","CRP*","BMI","CRP*","BMI"),
+qhet = data.frame(Exposure = c("CRP","BMI","CRP","BMI","CRP","BMI"),
                   Outcome = c("PMD","PMD","DA","DA","NDA","NDA"),
                   SNP = rep("CRP_BMI_instrument",6),
                   Estimate = c(PMD_qhet$`Effect Estimates`[1], PMD_qhet$`Effect Estimates`[2],
@@ -98,6 +92,9 @@ MVMR_data = MVMR_data %>%
          SNP = sub("VEGF.A_BMI_instrument","VEGF_BMI_instrument",SNP))
 
 MD_data = rbind_fill(MD_data,MD_OpenGWAS_data,MVMR_data)
+
+MD_data = MD_data %>%
+  mutate(Exposure = sub("CRP*", "CRP", Exposure))
 
 
 # Sensitivity analyses for significant CIMs #
